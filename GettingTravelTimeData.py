@@ -14,7 +14,7 @@ kml_file = path.join(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\D
 
 with open(kml_file) as fp:
     soup = BeautifulSoup(fp)
-print(soup.prettify())
+#print(soup.prettify())
 
 soup.placemark.find('name').string
 soup.placemark.lookat.longitude.string
@@ -74,4 +74,41 @@ EBAMTTRawDa['ClosestInt'] = np.nan
 for i in ['D1','D2','D3','D4','D5','D6']:
     Indx = EBAMTTRawDa.groupby('Run')[i].idxmin()
     EBAMTTRawDa.loc[Indx,'ClosestInt'] = i 
-    
+   
+
+EBAMTTRawDa.sort_values(['Run','Date_Time'],inplace=True)
+
+
+EBAMTTRawDa[['DateTShift','LatShift','LongShift']] = EBAMTTRawDa.groupby('Run')['Date_Time','Lat','Long'].shift(-1)
+
+
+ListDa =[]
+for key,group_df in EBAMTTRawDa.groupby('Run'):
+    RefDT1 = group_df.Date_Time[group_df.ClosestInt == 'D1'].values[0]
+    RefDT2 = group_df.Date_Time[group_df.ClosestInt == 'D6'].values[0]
+    mask  = (group_df.Date_Time>=RefDT1) & (group_df.Date_Time<=RefDT2)
+    tempDat = group_df[mask]
+    tempDat['ClosestInt'] = tempDat.ClosestInt.fillna(method='ffill')
+    ListDa.append(tempDat)
+
+EBDat = pd.concat(ListDa)
+
+EBDat.loc[:,"TimeDiff"] = (EBDat.DateTShift-EBDat.Date_Time).dt.total_seconds()
+
+
+def getDist_Fun2(row):
+    RowLatLong = tuple(row[['Lat','Long']].values.ravel())
+    NextLatLong = tuple(row[['LatShift','LongShift']].values.ravel())
+    if(row["LatShift"]==row["LatShift"]):
+        return geopy.distance.distance(NextLatLong,RowLatLong).feet
+    else: return 0
+
+EBDat.loc[:,'Speed_fps'] = EBDat.Speed *1.47
+EBDat.loc[:,'DistFromSpd'] = EBDat.Speed_fps * EBDat.TimeDiff
+EBDat.loc[:,'DistBtwPnt'] = EBDat[['Lat','Long','LatShift','LongShift']].apply(getDist_Fun2,axis=1)
+
+
+
+EBDat.groupby(['Run','ClosestInt']).agg({'DistFromSpd':'sum','DistBtwPnt':'sum','TimeDiff':'sum'})
+
+EBDat.groupby(['Run']).agg({'DistFromSpd':'sum','DistBtwPnt':'sum','TimeDiff':'sum'})
