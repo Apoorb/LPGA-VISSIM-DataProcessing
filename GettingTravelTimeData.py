@@ -96,10 +96,10 @@ def GetSummaryData(RawData, DatLatLong, Runs=[5,7,9,11,13],Dir='EB'):
     CleanDat.loc[:,'DistBtwPnt'] = CleanDat[['Lat','Long','LatShift','LongShift']].apply(getDist_Fun2,axis=1)
     SumIntDat= CleanDat.groupby(['Run','ClosestInt']).agg({'DistFromSpd':'sum','DistBtwPnt':'sum','TimeDiff':'sum'})
     SumIntDat = SumIntDat.reset_index(drop=False)
-    FinIntDat = SumIntDat.groupby(['ClosestInt']).agg({'DistFromSpd':'mean','DistBtwPnt':'mean','TimeDiff':'mean'})
-    FinIntDat.loc[:,'SMS_mph'] = FinIntDat.DistBtwPnt/ FinIntDat.TimeDiff/ 1.47
     LeftVars = ['Run','ClosestInt']
     SumIntDat = pd.merge(DataBoundary,SumIntDat,left_on = LeftVars, right_on = LeftVars, how='left')
+    FinIntDat = SumIntDat.groupby(['ClosestInt']).agg({'DistFromSpd':'mean','DistBtwPnt':'mean','TimeDiff':'mean'})
+    FinIntDat.loc[:,'SMS_mph'] = FinIntDat.DistBtwPnt/ FinIntDat.TimeDiff/ 1.47
     SumCorDat = CleanDat.groupby(['Run']).agg({'DistFromSpd':'sum','DistBtwPnt':'sum','TimeDiff':'sum'})
     SumCorDat.loc[:,'SMS'] = SumCorDat.DistBtwPnt/SumCorDat.TimeDiff
     SumCorDat = SumCorDat.reset_index(drop=False)
@@ -143,7 +143,7 @@ Names = ['LPGA@Tomoka','LPGA@I95-SB-Ramp','LPGA@I95-NB-Ramp','LPGA@Technology','
 
 FinData = {}
 
-Debug = False
+Debug = True
 if (Debug): 
     #AM_EB Zach Coordinates
     DatLaLong.loc[DatLaLong.Name=='LPGA@Tomoka',['Lat','Long']] = ['29.217025','-81.109812']
@@ -206,16 +206,16 @@ TTOut = path.join(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Docu
 if (Debug): 
     writer=pd.ExcelWriter(TTDebug)
     for key in FinData.keys():
-        FinData[key][1].to_excel(writer,key)
+        FinData[key][3].to_excel(writer,key)
         startrow1 = writer.sheets[key].max_row
-        FinData[key][3].to_excel(writer,key, startrow = startrow1+2)
+        FinData[key][1].to_excel(writer,key, startrow = startrow1+2)
     writer.save()
 else:
     writer=pd.ExcelWriter(TTOut)
     for key in FinData.keys():
-        FinData[key][0].to_excel(writer,key)
+        FinData[key][2].to_excel(writer,key)
         startrow1 = writer.sheets[key].max_row
-        FinData[key][2].to_excel(writer,key, startrow = startrow1+2)
+        FinData[key][0].to_excel(writer,key, startrow = startrow1+2)
     writer.save()
  
     
