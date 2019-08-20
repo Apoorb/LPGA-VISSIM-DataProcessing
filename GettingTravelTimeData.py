@@ -143,14 +143,14 @@ Names = ['LPGA@Tomoka','LPGA@I95-SB-Ramp','LPGA@I95-NB-Ramp','LPGA@Technology','
 
 FinData = {}
 
-Debug = True
+Debug = False
 if (Debug): 
     #AM_EB Zach Coordinates
     DatLaLong.loc[DatLaLong.Name=='LPGA@Tomoka',['Lat','Long']] = ['29.217025','-81.109812']
     DatLaLong.loc[DatLaLong.Name=='LPGA@Clyde-Morris',['Lat','Long']] = ['29.227215','-81.085725']
     Run1 = np.arange(0,100)
 else:
-    Run1 = [3,5,7,9,11,13,15]
+    Run1 = [5,7,9,11,13]
 FinData['AM_EB'] =GetSummaryData(RawData=AMTTRawDa, DatLatLong = DatLaLong, Runs=Run1,Dir='EB')
 FinData['AM_EB'][0]
 FinData['AM_EB'][1]
@@ -163,7 +163,7 @@ if (Debug):
     DatLaLong.loc[DatLaLong.Name=='LPGA@Tomoka',['Lat','Long']] = ['29.21753','-81.108792']
     Run1 = np.arange(0,100)
 else:
-    Run1 = [4,6,8,10,12,14]
+    Run1 = [6,8,10,12,14]
 FinData['AM_WB'] =GetSummaryData(RawData=AMTTRawDa, DatLatLong = DatLaLong, Runs=Run1 ,Dir='WB')
 FinData['AM_WB'][0]
 FinData['AM_WB'][1]
@@ -200,6 +200,35 @@ FinData['PM_WB'][1].DistBtwPnt.sum() / FinData['PM_WB'][1].TimeDiff.sum() /1.47
 #RawData=AMTTRawDa; DatLatLong = DatLaLong; Runs=[3,5,7,9,11,13]; Dir='EB'
 
 
+
+
+# VISSIM Travel Time Segments 
+TTSeg= {1: 'EB',
+            2: 'WB',
+            3: 'EB LPGA (Tomoka Rd to I-95 SB Ramp)',
+            4: 'EB LPGA (I-95 SB Ramp to I-95 NB Ramp)',
+            5: 'EB LPGA (I-95 NB Ramp to Technology Blvd)',
+            6: 'EB LPGA (Technology Blvd to Willamson Blvd)',
+            7: 'EB LPGA (Willamson Blvd to Clyde-Morris Blvd)',
+            8: 'WB LPGA (Clyde-Morris Blvd to Willamson Blvd)',
+            9: 'WB LPGA (Willamson Blvd to Technology Blvd)',
+            10:'WB LPGA (Technology Blvd to I-95 NB Ramp)',
+            11:'WB LPGA (I-95 NB Ramp to I-95 SB Ramp)',
+            12:'WB LPGA (I-95 SB Ramp to Tomoka Rd)'}
+
+EBKeys = {'D1':3,
+          'D2':4,
+          'D3':5,
+          'D4':6,
+          'D5':7}
+WBKeys = {'D6':8,
+          'D5':9,
+          'D4':10,
+          'D3':11,
+          'D2':12}
+
+
+
 TTDebug = path.join(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files\ComparisionValidat_Zach_TT.xlsx')
 TTOut = path.join(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files\TTData-by-Intersection.xlsx')
 
@@ -213,9 +242,20 @@ if (Debug):
 else:
     writer=pd.ExcelWriter(TTOut)
     for key in FinData.keys():
-        FinData[key][2].to_excel(writer,key)
+        dat = FinData[key][2] 
+        if ((key == 'AM_EB') |(key == 'PM_EB')):
+            dat= dat.rename(index=EBKeys).reset_index()
+        else:
+            dat= dat.rename(index=WBKeys).reset_index()
+        dat.loc[:,'SegName'] = dat.ClosestInt.apply(lambda x:TTSeg[x])
+        
+        dat.to_excel(writer,key)
         startrow1 = writer.sheets[key].max_row
         FinData[key][0].to_excel(writer,key, startrow = startrow1+2)
+        startrow1 = writer.sheets[key].max_row
+        FinData[key][3].to_excel(writer,key, startrow = startrow1+2)
+        startrow1 = writer.sheets[key].max_row
+        FinData[key][1].to_excel(writer,key, startrow = startrow1+2)
     writer.save()
  
     
