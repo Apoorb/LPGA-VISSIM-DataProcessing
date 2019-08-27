@@ -32,7 +32,17 @@ def TTSegName(x):
             9: 'WB LPGA (Willamson Blvd to Technology Blvd)',
             10:'WB LPGA (Technology Blvd to I-95 NB Ramp)',
             11:'WB LPGA (I-95 NB Ramp to I-95 SB Ramp)',
-            12:'WB LPGA (I-95 SB Ramp to Tomoka Rd)'}
+            12:'WB LPGA (I-95 SB Ramp to Tomoka Rd)',
+            13:'SB I-95',
+            14:'NB I-95',
+            15:'SB I-95 (SR40 to SB OffRamp)',
+            16:'SB I-95 (SB OffRamp to SB LoopRamp)',
+            17:'SB I-95 (SB LoopRamp to SB On-Ramp)',
+            18:'SB I-95 (SB On-Ramp to US92)',
+            19:'NB I-95 (US92 to NB OffRamp)',
+            20:'NB I-95 (NB OffRamp to NB LoopRamp)',
+            21:'NB I-95 ( NB LoopRamp to NB On-Ramp)',
+            22:'NB I-95 (NB On-Ramp to SR40)'}
     Nm = TTSeg[x]
     return Nm
 
@@ -62,7 +72,7 @@ def PreProcessVissimTT(file = ExistingAMfi):
     if (file ==ExistingPMfi):
         mask1 = (ExistingAMDat.TIMEINT.isin(['4500-5400','5400-6300','6300-7200','7200-8100'])) & (~ExistingAMDat.TTSegNm.isin(WB_TTSegs))
         #Can include '8100-9000'
-        mask2 = (ExistingAMDat.TIMEINT.isin(['4500-5400','5400-6300','6300-7200','7200-8100'])) & (ExistingAMDat.TTSegNm.isin(WB_TTSegs))
+        mask2 = (ExistingAMDat.TIMEINT.isin(['4500-5400','5400-6300','6300-7200','7200-8100','8100-9000'])) & (ExistingAMDat.TTSegNm.isin(WB_TTSegs))
         mask = mask1 | mask2
     else:
         mask = ExistingAMDat.TIMEINT.isin(['4500-5400','5400-6300','6300-7200','7200-8100']) 
@@ -98,6 +108,10 @@ FinTTDat['ExistingAM_WB_TT'] = ProcessObsData('AM_WB',ExistingAMDat).sort_index(
 FinTTDat['ExistingPM_EB_TT'] = ProcessObsData('PM_EB',ExistingPMDat)
 FinTTDat['ExistingPM_WB_TT'] = ProcessObsData('PM_WB',ExistingPMDat).sort_index(ascending=False)
 
+
+#*********************************************************************************
+# Write to excel
+#*********************************************************************************
 
 PathToKeyVal = r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files'
 OutFi = "Report-TT-GEH-Results.xlsx"

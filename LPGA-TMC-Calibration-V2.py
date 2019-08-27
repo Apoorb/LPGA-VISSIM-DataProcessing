@@ -84,18 +84,18 @@ PMConvFactors = {
 
 
 AMConvFactors = {
- '900-1800':.60,
- '1800-2700':.71,
- '2700-3600':.78,
- '3600-4500':.81,
- '4500-5400':.94,
- '5400-6300':1.05,
- '6300-7200':1.04,
- '7200-8100':0.96,
- '8100-9000':.92,
- '9000-9900':.88,
- '9900-10800':.77,
- '10800-11700':.69
+ '900-1800':.38,
+ '1800-2700':.54,
+ '2700-3600':.60,
+ '3600-4500':.66,
+ '4500-5400':.90,
+ '5400-6300':1.12,
+ '6300-7200':1.12,
+ '7200-8100':0.86,
+ '8100-9000':.82,
+ '9000-9900':.82,
+ '9900-10800':.74,
+ '10800-11700':.66
  }
 
 def ReadMergeVissimObs(VissimDATA = ExPMMvMDat, File = KeyValFi,VolTime='PeakPMVol' , Peak = (.98+.95+1.05+1.02), 
@@ -158,7 +158,7 @@ KeyValFi = os.path.join(PathToKeyVal,KeyValFi)
 
 ExistPM_Vissim = ReadMergeVissimObs()
 ExistAM_Vissim = ReadMergeVissimObs(VissimDATA = ExAMMvMDat, File = KeyValFi,VolTime='PeakAMVol' ,
-                       Peak = (.94 + 1.05 + 1.04 + 0.96), 
+                       Peak = (.90 + 1.12 + 1.12 + 0.86), 
                        ConversionFactors = AMConvFactors)
 
 
