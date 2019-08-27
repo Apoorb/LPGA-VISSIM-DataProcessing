@@ -19,7 +19,7 @@ import pandas as pd
 import numpy as np
 import glob
 import datetime
-
+# Use consistent naming in VISSIM
 def TTSegName(x):
     TTSeg= {1: 'EB',
             2: 'WB',
@@ -55,9 +55,12 @@ ExistingAMfi ='20834_Existing_AM--C1C2aC3C4C5C6C7C8_Vehicle Travel Time Results.
 ExistingAMfi = os.path.join(PathToExist,ExistingAMfi)
 
 def PreProcessVissimTT(file = ExistingAMfi):
+    # Define PM file. Would later use to figure out if a file for PM 
+    # This is hard coding. Would break if the name of PM file is changed.
     PathToExist = r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files\VISSIM - V2\Existing'
     RefFile = '20834_Existing_PM--C1C2C3C4C5C6C7_Vehicle Travel Time Results.att'
     RefFile = os.path.join(PathToExist,RefFile)
+    # Read VISSIM results
     ExistingAMDat=pd.read_csv(file,sep =';',skiprows=17)
     ExistingAMDat.columns
     ExistingAMDat.rename(columns={'TRAVTM(ALL)':'VissimTT','VEHS(ALL)':'Veh'},inplace=True)
@@ -69,14 +72,16 @@ def PreProcessVissimTT(file = ExistingAMfi):
            'WB LPGA (Technology Blvd to I-95 NB Ramp)',
            'WB LPGA (I-95 NB Ramp to I-95 SB Ramp)',
             'WB LPGA (I-95 SB Ramp to Tomoka Rd)']
+    #'4500-5400','5400-6300','6300-7200','7200-8100' are peak periods
     if (file ==ExistingPMfi):
         mask1 = (ExistingAMDat.TIMEINT.isin(['4500-5400','5400-6300','6300-7200','7200-8100'])) & (~ExistingAMDat.TTSegNm.isin(WB_TTSegs))
-        #Can include '8100-9000'
+        #Can include '8100-9000' as WB TT Run includes 15 min after the peak
         mask2 = (ExistingAMDat.TIMEINT.isin(['4500-5400','5400-6300','6300-7200','7200-8100','8100-9000'])) & (ExistingAMDat.TTSegNm.isin(WB_TTSegs))
         mask = mask1 | mask2
     else:
         mask = ExistingAMDat.TIMEINT.isin(['4500-5400','5400-6300','6300-7200','7200-8100']) 
     ExistingAMDat = ExistingAMDat[mask]
+    # Get weighted average over the 4/5 intervals
     ExistingAMDat.loc[:,'VissimTotalTT'] = ExistingAMDat.VissimTT * ExistingAMDat.Veh
     ExistingAMDat = ExistingAMDat.groupby(['VEHICLETRAVELTIMEMEASUREMENT','TTSegNm'])['VissimTotalTT','Veh'].sum().reset_index()
     ExistingAMDat.loc[:,'WeightedVissimTT'] = ExistingAMDat.VissimTotalTT/ExistingAMDat.Veh
@@ -89,11 +94,13 @@ ExistingPMDat = PreProcessVissimTT(ExistingPMfi)
 #TTRun Files
 #*********************************************************************************
 def ProcessObsData(TimePeriod,VissimDat):    
+    #Read the observed TT data
     TTRunFile = os.path.join(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files\TTData-by-Intersection.xlsx')
     x1 = pd.ExcelFile(TTRunFile)
     x1.sheet_names
     Dat = x1.parse(TimePeriod, index_col=0,nrows= 5,usecols=['ClosestInt', 'DistFromSpd', 'DistBtwPnt', 'TimeDiff', 'SMS_mph',
        'SegName'])
+    #Merge with ViSSIM TT data
     Dat = pd.merge(Dat,VissimDat,left_on=['ClosestInt'],right_on=['VEHICLETRAVELTIMEMEASUREMENT'], how ='left')
     Dat.loc[:,'DiffInTravelTime'] = Dat.TimeDiff- Dat.WeightedVissimTT
     Dat.rename(columns={'TimeDiff':'ObsTravelTime'},inplace=True)
@@ -120,6 +127,7 @@ OutFi = os.path.join(PathToKeyVal,OutFi)
 writer=pd.ExcelWriter(OutFi)
 startrow1 = 1
 for key,val in FinTTDat.items():
+    # Write tables on same sheet wih 2 row spacing
     val.to_excel(writer,'TTResults', startrow = startrow1+3)
     worksheet = writer.sheets['TTResults']
     worksheet.cell(startrow1+2, 1, key)
