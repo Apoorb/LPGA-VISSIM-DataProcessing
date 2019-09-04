@@ -45,14 +45,14 @@ def TTSegName(x):
             12:'WB LPGA (I-95 SB Ramp to Tomoka Rd)',
             13:'SB I-95',
             14:'NB I-95',
-            15:'SB I-95 (SR40 to SB OffRamp)',
-            16:'SB I-95 (SB OffRamp to SB LoopRamp)',
-            17:'SB I-95 (SB LoopRamp to SB On-Ramp)',
-            18:'SB I-95 (SB On-Ramp to US92)',
-            19:'NB I-95 (US92 to NB OffRamp)',
-            20:'NB I-95 (NB OffRamp to NB LoopRamp)',
-            21:'NB I-95 ( NB LoopRamp to NB On-Ramp)',
-            22:'NB I-95 (NB On-Ramp to SR40)'}
+            15:'SB I-95 (SR-40 to SB Off-Ramp)',
+            16:'SB I-95 (SB Off-Ramp to SB Loop-Ramp)',
+            17:'SB I-95 (SB Loop-Ramp to SB On-Ramp)',
+            18:'SB I-95 (SB On-Ramp to US-92)',
+            19:'NB I-95 (US-92 to NB Off-Ramp)',
+            20:'NB I-95 (NB Off-Ramp to NB Loop-Ramp)',
+            21:'NB I-95 ( NB Loop-Ramp to NB On-Ramp)',
+            22:'NB I-95 (NB On-Ramp to SR-40)'}
     if x < 23:
         Nm = TTSeg[x]
     else:
@@ -104,24 +104,24 @@ def PreProcessVissimDensity(file, SegKeyVal):
     ExistingAMDat.loc[:,"VissimSMS"] = (ExistingAMDat['Len']/ExistingAMDat['VissimTT']/1.47).round(1)
     #Get flow rate and density
     ExistingAMDat.loc[:,'FlowRate'] = ExistingAMDat.Veh *4
-    ExistingAMDat.loc[:,'DensityPerLane'] = (ExistingAMDat.FlowRate/ ExistingAMDat.VissimSMS/ExistingAMDat.NumLanes).round(1)
-    ExistingAMDat.loc[:,'LenByDensity'] = ExistingAMDat.DensityPerLane *ExistingAMDat.Len
+    ExistingAMDat.loc[:,'Density'] = (ExistingAMDat.FlowRate/ ExistingAMDat.VissimSMS).round(1)
+    ExistingAMDat.loc[:,'Density_Len_Lanes'] = ExistingAMDat.Density *ExistingAMDat.Len
+    ExistingAMDat.loc[:,'Len_Lanes'] = ExistingAMDat.Len * ExistingAMDat.NumLanes
     ExistingAMDat.columns
-    DensityData = ExistingAMDat.groupby(['TIMEINT','SegName'])['Len','LenByDensity'].sum().reset_index()
-    DensityData.loc[:,'WeightedDensity'] = (DensityData.LenByDensity/ DensityData.Len).round(1)
-    DensityData.rename(columns={'Len':'Len1'},inplace=True)
-    DensityData = DensityData[['TIMEINT','SegName','Len1','WeightedDensity']]
+    DensityData = ExistingAMDat.groupby(['TIMEINT','SegName'])['Len_Lanes','Density_Len_Lanes'].sum().reset_index()
+    DensityData.loc[:,'WeightedDensity'] = (DensityData.Density_Len_Lanes/ DensityData.Len_Lanes).round(1)
+    DensityData = DensityData[['TIMEINT','SegName','WeightedDensity']]
     return(DensityData)
 
 
-I95_Segs = [     'NB I-95 (US92 to NB OffRamp)',
-                'NB I-95 (NB OffRamp to NB LoopRamp)',
-                'NB I-95 ( NB LoopRamp to NB On-Ramp)',
-                'NB I-95 (NB On-Ramp to SR40)',
-                'SB I-95 (SR40 to SB OffRamp)',
-                'SB I-95 (SB OffRamp to SB LoopRamp)',
-                'SB I-95 (SB LoopRamp to SB On-Ramp)',
-                'SB I-95 (SB On-Ramp to US92)'
+I95_Segs = [     'NB I-95 (US-92 to NB Off-Ramp)',
+                'NB I-95 (NB Off-Ramp to NB Loop-Ramp)',
+                'NB I-95 ( NB Loop-Ramp to NB On-Ramp)',
+                'NB I-95 (NB On-Ramp to SR-40)',
+                'SB I-95 (SR-40 to SB Off-Ramp)',
+                'SB I-95 (SB Off-Ramp to SB Loop-Ramp)',
+                'SB I-95 (SB Loop-Ramp to SB On-Ramp)',
+                'SB I-95 (SB On-Ramp to US-92)'
                ]
   
 LPGASeg=['EB LPGA (Tomoka Rd to I-95 SB Ramp)',
@@ -202,6 +202,8 @@ PerfMes ='VissimSMS'
 os.chdir(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files\Figs')
 DictFigs = {}
 idx = pd.IndexSlice
+#Color Palettes
+#https://matplotlib.org/users/colormaps.html
 for t in TimePer:
     for d in Direction:
         for PerfMes in PerfMeasure:
@@ -212,8 +214,10 @@ for t in TimePer:
                 if PerfMes=='Density':
                     vmax_ = 65; vmin_ = 0
                     title_ = "Density (veh/mile/lane)"
+                    colorBar_ = 'viridis_r'
                 else:   
                     title_ = "Space Mean Speed (mph)"
+                    colorBar_ = 'viridis'
                     if(d=='SB') | (d=='NB'):
                         vmax_ = 70; vmin_ = 0
                     else:
@@ -221,9 +225,9 @@ for t in TimePer:
                 plt.figure()
                 # figure size in inches
                 #sns.set(rc={'figure.figsize':(6,10)})
-                g = sns.heatmap(HeatMapDat,cmap = 'Greys', linewidths=.5, vmin=vmin_, vmax=vmax_)
+                g = sns.heatmap(HeatMapDat,cmap = colorBar_, linewidths=.5, vmin=vmin_, vmax=vmax_)
                 g.set_xticklabels(rotation=30,labels = g.get_xticklabels(),ha='right')
-                g.set_title('{}'.format(title_))
+                g.set_title('{}—{}'.format(t,title_))
                 g.set_xlabel("")
                 g.set_ylabel("15 min Time Interval")
                 fig = g.get_figure()
@@ -257,7 +261,7 @@ for t in TimePer:
                         ax1.set_ylim(0,65)
                         ylab = "Density (veh/mile/lane)"
 
-                    ax1.set_title('{}'.format(Tseg), y =1.05)
+                    ax1.set_title('{}—{}'.format(t,Tseg), y =1.05)
                     ax1.set_ylabel(ylab)
                     ax1.set_xlabel("15 min Time Interval")
                     # Must draw the canvas to position the ticks
