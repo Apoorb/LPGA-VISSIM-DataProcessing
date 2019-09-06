@@ -90,6 +90,7 @@ def ReadMergeVissimObs(VissimDATA, File):
     ExistPM_Vissim.loc[:,'Delay'] = (ExistPM_Vissim.DelayIntoVeh/ ExistPM_Vissim.veh).round(1).astype('float')
     ExistPM_Vissim.loc[:,'Delay'] = ExistPM_Vissim.loc[:,'Delay'].fillna(0)
     ExistPM_Vissim.loc[:,'LOS'] = ExistPM_Vissim.Delay.apply(LOS_Calc)
+    ExistPM_Vissim.loc[:,'QLenMax'] = ExistPM_Vissim.loc[:,'QLenMax'].fillna(0)
     ExistPM_Vissim.loc[:,'QLenMax'] = ExistPM_Vissim.QLenMax.round(1)
     ExistPM_Vissim.drop(columns=['veh','DelayIntoVeh'],inplace=True)
     ExistPM_Vissim.Movement = pd.Categorical(ExistPM_Vissim.Movement,[
@@ -132,6 +133,8 @@ def ReadMergeVissimObs(VissimDATA, File):
                                   [u'Delay',u'LOS','QLenMax']], names=['HourGroup','HourInt',''])
     ExistPM_Vissim = ExistPM_Vissim.reindex(mux,axis=1)
     ExistPM_Vissim = ExistPM_Vissim.dropna(axis=1)
+    idx = pd.IndexSlice
+    ExistPM_Vissim.loc[idx[:,'OverallIntersection'],idx[:,:,'QLenMax']] = None
     return(ExistPM_Vissim)
 
     
