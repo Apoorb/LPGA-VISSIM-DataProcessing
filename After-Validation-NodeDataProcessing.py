@@ -41,14 +41,19 @@ OutFi = "Report-Vissim-DelayQLenLOS-Results.xlsx"
 OutFi = os.path.join(PathToKeyVal,OutFi)
 writer=pd.ExcelWriter(OutFi)
 
+
+i = ExistingFile[1]
+VissimDATA = ReadExistNodeDelay(file = i)
+file = i
+File = KeyValFi
 ExistDat= {}
 for i in ExistingFile:
     match_AM = re.search('_AM',i)
     if(match_AM):
-        ExistDat['AM'] = ReadMergeVissimObs(VissimDATA = ReadExistNodeDelay(file = i),File = KeyValFi)
+        ExistDat['AM'] = ReadMergeVissimObs(VissimDATA = ReadExistNodeDelay(file = i),File = KeyValFi,IsFileExisting=True)
         ExistDat['AM'].to_excel(writer,'ExistingAM_DelayRes')
     else:
-        ExistDat['PM'] = ReadMergeVissimObs(VissimDATA =ReadExistNodeDelay(file = i),File = KeyValFi)
+        ExistDat['PM'] = ReadMergeVissimObs(VissimDATA =ReadExistNodeDelay(file = i),File = KeyValFi,IsFileExisting=True)
         ExistDat['PM'].to_excel(writer,'ExistingPM__DelayRes')
 writer.save()
 
@@ -63,6 +68,12 @@ for i in NoBuildFile:
         NoBuild['PM'] = ReadMergeVissimObs(VissimDATA =ReadExistNodeDelay(file = i),File = KeyValFi,SheetNm="NoBuildAM")
         NoBuild['PM'].to_excel(writer,'No-BuildPM__DelayRes')
 writer.save()    
+
+i = DCDCFile[1]
+VissimDATA = ReadExistNodeDelay(file = i)
+file = i
+File = KeyValFi
+ExistDat= {}
 
 DCDI = {}
 writer=pd.ExcelWriter(OutFi,mode='a')
@@ -82,10 +93,10 @@ for i in DCMIFile:
     match_AM = re.search('_AM',i)
     if(match_AM):
         DCMI['AM'] = ReadMergeVissimObs(VissimDATA = ReadDCMINodeDelay(file = i),File = None,SheetNm=None,IsFileDCMI=True)
-        DCMI['AM'].to_excel(writer,'DCMI-AM_DelayRes')
+        DCMI['AM'].to_excel(writer,'DCMI-AM_DelayRes',na_rep=' ')
     else:
         DCMI['PM'] = ReadMergeVissimObs(VissimDATA =ReadDCMINodeDelay(file = i),File = None,SheetNm=None,IsFileDCMI=True)
-        DCMI['PM'].to_excel(writer,'DCMI-PM__DelayRes')
+        DCMI['PM'].to_excel(writer,'DCMI-PM__DelayRes',na_rep=' ')
 writer.save()    
 
         
