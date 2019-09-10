@@ -25,7 +25,7 @@ def ReadExistNodeDelay(file):
     '''
     #NoBuild
     NoBuildFile_=glob.glob(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files\VISSIM - V2\No Build\*Node Results.att')
-    DCMIFile_=glob.glob(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files\VISSIM - V2\Build\DCMI\*Node Results.att')
+    #DCMIFile_=glob.glob(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files\VISSIM - V2\Build\DCMI\*Node Results.att')
     ExistingPMDat=pd.read_csv(file,sep =';',skiprows=28)
     ExistingPMDat.columns
     #Use Avg values only
@@ -70,25 +70,10 @@ def ReadExistNodeDelay(file):
         ExPMMvMDat.loc[maskCorrect,'To'] = 'NB Technology Blvd'
         ExPMMvMDat.loc[maskCorrect,'From'] = 'None'
         ExPMMvMDat.loc[ExPMMvMDat.FromLink=='97','From'] = "SB Technology Blvd" 
-
-    match_AM = re.search('_AM',file)
-    if((file==DCMIFile_[0])|(file==DCMIFile_[1])):
-        if(match_AM):
-            ExPMMvMDat.loc[ExPMMvMDat.FromLink=='10066','From'] = "SB 95 OFR RTL" 
-            ExPMMvMDat.loc[ExPMMvMDat.FromLink=='10071','From'] = "SB 95 OFR LTL" 
-            ExPMMvMDat.loc[ExPMMvMDat.ToLink=='10002','To'] = "WB LPGA Blvd" 
-            ExPMMvMDat.loc[ExPMMvMDat.FromLink=='10009','From'] = "WB LPGA Blvd" 
-            ExPMMvMDat.loc[ExPMMvMDat.ToLink=='10009','To'] = "WB LPGA Blvd" 
-            ExPMMvMDat.loc[ExPMMvMDat.FromLink=='5','From'] = "NB 95 OFR LTL" 
-            ExPMMvMDat.loc[ExPMMvMDat.FromLink=='6','From'] = "NB 95 OFR RTL" 
-            ExPMMvMDat.loc[ExPMMvMDat.FromLink=='10155','From'] = "EB LPGA Blvd"
-            ExPMMvMDat.loc[ExPMMvMDat.ToLink=='10155','To'] = "EB LPGA Blvd"
-            ExPMMvMDat.loc[ExPMMvMDat.FromLink=='10148','From'] = "None"
-            ExPMMvMDat.loc[ExPMMvMDat.ToLink=='10148','To'] = "None"
     ExPMMvMDat.rename(columns= {'VEHS(ALL)':'veh','QLENMAX':'QLenMax','VEHDELAY(ALL)':'Delay'},inplace=True)
     ExPMMvMDat = ExPMMvMDat.loc[:,['Intersection','To','From','HourInt','ToLink','FromLink','veh','Delay','QLenMax']]
-#    ExPMMvMDat.loc[ExPMMvMDat.To.isnull(),'To'] = 'None'
-#    ExPMMvMDat.loc[ExPMMvMDat.From.isnull(),'From'] = 'None'
+    ExPMMvMDat.loc[ExPMMvMDat.To.isnull(),'To'] = 'None'
+    ExPMMvMDat.loc[ExPMMvMDat.From.isnull(),'From'] = 'None'
     return(ExPMMvMDat)
     
 def LOS_Calc(Delay):
@@ -108,12 +93,32 @@ def LOS_Calc(Delay):
     else:
         LOS = 'Z'
     return(LOS)
+    
+def LOS_Calc_TWSC(Delay):
+    LOS = 'Z'
+    if Delay<=10:
+        LOS = 'A'
+    elif ((Delay>10) & (Delay<=15)):
+        LOS = 'B'
+    elif ((Delay>15) & (Delay<=25)):
+        LOS = 'C'
+    elif ((Delay>25) & (Delay<=35)):
+        LOS = 'D'
+    elif ((Delay>35) & (Delay<=50)):
+        LOS = 'E'
+    elif Delay > 50:
+        LOS = 'F'
+    else:
+        LOS = 'Z'
+    return(LOS)
         
-def ReadMergeVissimObs(VissimDATA, File=None, SheetNm = 'ExistingAM',IsFileDCMI=False):
+def ReadMergeVissimObs(VissimDATA, File=None, SheetNm = 'ExistingAM',IsFileDCMI=False, IsFileExisting=False):
     '''
     Don't care about ExistingPM_Vissim nomeclature
     VissimDATA = ExPMMvMDat,  # Vissim results to merge
     File = KeyValFi, # Key value file for PM
+    IsFileDCMI =  DCMI VissimData has movement field also. Need to treated diff
+    IsFileExisting = Tomoka is TWSC in Existing scenarios. Use LOS_Calc_TWSC for it in Existing
     Returns = Result reshaped for Report
     '''
     if(IsFileDCMI==False):
@@ -152,7 +157,13 @@ def ReadMergeVissimObs(VissimDATA, File=None, SheetNm = 'ExistingAM',IsFileDCMI=
     ExistPM_Vissim = pd.concat([ExistPM_Vissim,TempOverall],sort=False).reset_index()
     ExistPM_Vissim.loc[:,'Delay'] = (ExistPM_Vissim.DelayIntoVeh/ ExistPM_Vissim.veh).round(1).astype('float')
     ExistPM_Vissim.loc[:,'Delay'] = ExistPM_Vissim.loc[:,'Delay'].fillna(0)
-    ExistPM_Vissim.loc[:,'LOS'] = ExistPM_Vissim.Delay.apply(LOS_Calc)
+    #Tomoka is TWSC in Existing. Treat it differently for Existing
+    if IsFileExisting==True:
+        Mask_Tomoka = ExistPM_Vissim.Intersection == '1'
+        ExistPM_Vissim.loc[Mask_Tomoka,'LOS'] = ExistPM_Vissim.Delay.apply(LOS_Calc_TWSC)
+        ExistPM_Vissim.loc[~Mask_Tomoka,'LOS'] = ExistPM_Vissim.Delay.apply(LOS_Calc)
+    else:
+        ExistPM_Vissim.loc[:,'LOS'] = ExistPM_Vissim.Delay.apply(LOS_Calc)
     ExistPM_Vissim.loc[:,'QLenMax'] = ExistPM_Vissim.loc[:,'QLenMax'].fillna(0)
     ExistPM_Vissim.loc[:,'QLenMax'] = ExistPM_Vissim.QLenMax.round(1)
     ExistPM_Vissim.drop(columns=['veh','DelayIntoVeh'],inplace=True)
@@ -203,7 +214,7 @@ def ReadMergeVissimObs(VissimDATA, File=None, SheetNm = 'ExistingAM',IsFileDCMI=
     ExistPM_Vissim = ExistPM_Vissim.dropna(axis=1)
     ExistPM_Vissim = ExistPM_Vissim.sort_index()
     idx = pd.IndexSlice
-    ExistPM_Vissim.loc[idx[:,'OverallIntersection'],idx[:,:,'QLenMax']] = None
+    ExistPM_Vissim.loc[idx[:,'OverallIntersection'],idx[:,:,'QLenMax']] = ' ' 
     return(ExistPM_Vissim)
 
     
