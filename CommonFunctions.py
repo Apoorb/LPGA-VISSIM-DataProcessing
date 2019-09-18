@@ -8,7 +8,7 @@ Created on Fri Sep  6 13:03:48 2019
 import pandas as pd
 import glob
 import re
-
+import numpy as np
 #Debug
 #import glob
 #NoBuildFile=glob.glob(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files\VISSIM - V2\No Build\*Node Results.att')
@@ -167,11 +167,17 @@ def ReadMergeVissimObs(VissimDATA, File=None, SheetNm = 'ExistingAM',IsFileDCMI=
     ExistPM_Vissim.loc[:,'QLenMax'] = ExistPM_Vissim.loc[:,'QLenMax'].fillna(0)
     ExistPM_Vissim.loc[:,'QLenMax'] = ExistPM_Vissim.QLenMax.round(1)
     ExistPM_Vissim.drop(columns=['veh','DelayIntoVeh'],inplace=True)
+    Temp = ExistPM_Vissim[ExistPM_Vissim.Movement =='OverallIntersection'].copy()
+    Temp.loc[:,'Movement'] = 'HSep'
+    Temp.loc[:,['Delay','LOS','QLenMax']] = '---'
+    ExistPM_Vissim = pd.concat([ExistPM_Vissim,Temp])
     ExistPM_Vissim.Movement = pd.Categorical(ExistPM_Vissim.Movement,[
             'EB L','EB U/L','EB L/T','EB T', 'EB R', 'EB T/R'
     ,'WB L','WB U/L', 'WB T/R','WB T', 'WB R','NB U/L', 'NB L','NB T/R',
-     'NB T', 'NB R','SB U/L','SB L', 'SB T','SB R','SB T/R','SB L/T/R','OverallIntersection'
+     'NB T', 'NB R','SB U/L','SB L', 'SB T','SB R','SB T/R','SB L/T/R','OverallIntersection','HSep'
     ])
+    
+    
 # Break Data in 1 hour Groups
     mask1 = ExistPM_Vissim.HourInt.isin(['900-1800','1800-2700','2700-3600','3600-4500'])
     mask2 = ExistPM_Vissim.HourInt.isin(['4500-5400','5400-6300','6300-7200','7200-8100'])
@@ -202,18 +208,21 @@ def ReadMergeVissimObs(VissimDATA, File=None, SheetNm = 'ExistingAM',IsFileDCMI=
                         'LPGA/Technology',
                         'LPGA/Williamson',
                         'LPGA/Clyde Morris'])
-    
+    ExistPM_Vissim.loc[:,'Sep'] =  np.nan
     ExistPM_Vissim = ExistPM_Vissim.set_index(['Intersection','Movement','HourInt','HourGroup']).unstack().unstack()
     ExistPM_Vissim.columns = ExistPM_Vissim.columns.swaplevel(0, 2)
     ExistPM_Vissim.columns = ExistPM_Vissim.columns.swaplevel(0, 1)
     mux = pd.MultiIndex.from_product([[1,2,3],['900-1800','1800-2700','2700-3600','3600-4500',
                                         '4500-5400','5400-6300','6300-7200','7200-8100',
                                         '8100-9000','9000-9900','9900-10800','10800-11700'],
-                                  [u'Delay',u'LOS','QLenMax']], names=['HourGroup','HourInt',''])
+                                  [u'Delay',u'LOS','QLenMax','Sep']], names=['HourGroup','HourInt',''])
+    idx = pd.IndexSlice  
+    ExistPM_Vissim.loc[:,idx[1,'3600-4500', 'Sep']] = '|'
+    ExistPM_Vissim.loc[:,idx[2,'7200-8100', 'Sep']] = '|'
     ExistPM_Vissim = ExistPM_Vissim.reindex(mux,axis=1)
     ExistPM_Vissim = ExistPM_Vissim.dropna(axis=1)
     ExistPM_Vissim = ExistPM_Vissim.sort_index()
-    idx = pd.IndexSlice
+    
     ExistPM_Vissim.loc[idx[:,'OverallIntersection'],idx[:,:,'QLenMax']] = ' ' 
     return(ExistPM_Vissim)
 
