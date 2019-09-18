@@ -20,7 +20,7 @@ import subprocess
 
 
 PathToExist = r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files\VISSIM - V2\Existing'
-ExistingPMfi = '20834_Existing_PM--C1C2C3C4C5C6C7_Node Results.att'
+ExistingPMfi = '20834_Existing_PM--C1C2C3C4C5C6C7C8_Node Results.att'
 ExistingPMfi = os.path.join(PathToExist,ExistingPMfi)
 
 # Read VISSIM File
@@ -57,7 +57,7 @@ def ReadExistNodeRes(file =ExistingPMfi):
 
 
 ExPMMvMDat = ReadExistNodeRes(ExistingPMfi)
-ExistingAMfi ='20834_Existing_AM--C1C2aC3C4C5C6C7C8_Node Results.att'
+ExistingAMfi ='20834_Existing_AM--C1C2aC3C4C5C6C7C8C9_Node Results.att'
 ExistingAMfi = os.path.join(PathToExist,ExistingAMfi)
 ExAMMvMDat = ReadExistNodeRes(ExistingAMfi)
 
@@ -149,6 +149,11 @@ def ReadMergeVissimObs(VissimDATA = ExPMMvMDat, File = KeyValFi,VolTime='PeakPMV
              left_on =['Intersection','HourInt','Movement'],
              right_on = ['Intersection','HourInt','Movement'],
              how='left')
+    Debug = ExistPM_Vissim
+    Debug.loc[:,'Num'] = ((ExistPM_Vissim.VissimVol - ExistPM_Vissim.ObsVol)**2)
+    Debug.loc[:,'Denom'] = ((ExistPM_Vissim.VissimVol + ExistPM_Vissim.ObsVol)/2)
+    Debug.loc[:,'Ratio'] = Debug.loc[:,'Num']/  Debug.loc[:,'Denom']
+    Debug.loc[:,'Ratio_Sqrt'] = np.sqrt(Debug.loc[:,'Ratio'])
     ExistPM_Vissim.loc[:,'GEH'] = np.sqrt(((ExistPM_Vissim.VissimVol - ExistPM_Vissim.ObsVol)**2)/ ((ExistPM_Vissim.VissimVol + ExistPM_Vissim.ObsVol)/2))
     return(ExistPM_Vissim)
 
