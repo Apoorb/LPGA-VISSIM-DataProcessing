@@ -23,6 +23,8 @@ import numpy as np
 import glob
 import subprocess
 import re
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 #Read the Node Results Files
 ExistingFile=glob.glob(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files\VISSIM - V2\Existing\*Node Results.att')
@@ -73,7 +75,7 @@ i = DCDCFile[1]
 VissimDATA = ReadExistNodeDelay(file = i)
 file = i
 File = KeyValFi
-ExistDat= {}
+#ExistDat= {}
 
 DCDI = {}
 writer=pd.ExcelWriter(OutFi,mode='a')
@@ -86,6 +88,7 @@ for i in DCDCFile:
         DCDI['PM'] = ReadMergeVissimObs(VissimDATA =ReadExistNodeDelay(file = i),File = KeyValFi,SheetNm="DCDI-PM")
         DCDI['PM'].to_excel(writer,'DCDI-PM__DelayRes')
 writer.save()    
+
 
 DCMI = {}
 writer=pd.ExcelWriter(OutFi,mode='a')
@@ -126,3 +129,33 @@ DCMCFileKeyVal.to_csv(RoughFi,na_rep='None')
 
 
 subprocess.Popen([OutFi],shell=True)  
+
+#Plotting the data
+###############################################################################################################
+datDict = {'Existing':ExistDat,
+           'No-Build': NoBuild,
+           'DCDI': DCDI,
+           'DCMI':DCMI}
+FinDat = pd.DataFrame()
+for Scen,dataDict in datDict.items():
+    print(Scen)
+    for pk,dat in dataDict.items():
+        idx = pd.IndexSlice
+        dat1 = dat.loc[idx[:,'OverallIntersection'],idx[:,:,'Delay']].droplevel(0,axis=1).droplevel(1).swaplevel(axis=1).stack().reset_index()
+        dat1.loc[:,'Scenario'] = Scen
+        dat1.loc[:,'Peak'] = pk
+        FinDat = pd.concat([dat1,FinDat])
+
+FinDat.HourInt = pd.Categorical(FinDat.HourInt,['900-1800','1800-2700','2700-3600','3600-4500',
+                                        '4500-5400','5400-6300','6300-7200','7200-8100',
+                                        '8100-9000','9000-9900','9900-10800','10800-11700'])
+FinDat = FinDat.sort_values(['HourInt','Intersection'])
+FinDat
+
+
+#https://www.drawingfromdata.com/how-to-rotate-axis-labels-in-seaborn-and-matplotlib
+g= sns.catplot(x='HourInt',y='Delay',hue= 'Scenario',col='Intersection',col_wrap=2 ,data= FinDat[FinDat.Peak=='AM'])
+for axes in g.axes.flat:
+    axes.set_xticklabels(axes.get_xticklabels(), rotation=65, horizontalalignment='right')
+
+g.savefig(PathToKeyVal+'\\TotIntersectionDelay.jpg')
