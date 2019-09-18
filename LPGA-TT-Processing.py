@@ -43,15 +43,17 @@ def TTSegName(x):
             20:'NB I-95 (NB OffRamp to NB LoopRamp)',
             21:'NB I-95 ( NB LoopRamp to NB On-Ramp)',
             22:'NB I-95 (NB On-Ramp to SR40)'}
-    Nm = TTSeg[x]
+    if(x<23):
+        Nm = TTSeg[x]
+    else: Nm = None
     return Nm
 
 # VISSIM File
 #*********************************************************************************
 PathToExist = r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files\VISSIM - V2\Existing'
-ExistingPMfi = '20834_Existing_PM--C1C2C3C4C5C6C7_Vehicle Travel Time Results.att'
+ExistingPMfi = '20834_Existing_PM--C1C2C3C4C5C6C7C8_Vehicle Travel Time Results.att'
 ExistingPMfi = os.path.join(PathToExist,ExistingPMfi)
-ExistingAMfi ='20834_Existing_AM--C1C2aC3C4C5C6C7C8_Vehicle Travel Time Results.att'
+ExistingAMfi ='20834_Existing_AM--C1C2aC3C4C5C6C7C8C9_Vehicle Travel Time Results.att'
 ExistingAMfi = os.path.join(PathToExist,ExistingAMfi)
 
 def PreProcessVissimTT(file = ExistingAMfi):
