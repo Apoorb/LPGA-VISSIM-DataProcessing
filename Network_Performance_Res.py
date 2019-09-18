@@ -33,7 +33,7 @@ DCMIFile=glob.glob(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Doc
 ExistDat = {}
 ExistDat['AM'] 
 
-Dat = pd.read_csv(ExistingFile[0],sep =';',skiprows=62)
+Dat = pd.read_csv(DCMIFile[0],sep =';',skiprows=62)
 Dat.columns
 Dat = Dat[Dat['$VEHICLENETWORKPERFORMANCEMEASUREMENTEVALUATION:SIMRUN']=='AVG']
 
