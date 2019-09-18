@@ -142,16 +142,16 @@ LPGASeg=['EB LPGA (Tomoka Rd to I-95 SB Ramp)',
 # VISSIM File
 #*********************************************************************************
 PathToFile= r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files\VISSIM - V2'
-ExistingPMfi = r'Existing\20834_Existing_PM--C1C2C3C4C5C6C7_Vehicle Travel Time Results.att'
+ExistingPMfi = r'Existing\20834_Existing_PM--C1C2C3C4C5C6C7C8_Vehicle Travel Time Results.att'
 ExistingPMfi = os.path.join(PathToFile,ExistingPMfi)
-ExistingAMfi =r'Existing\20834_Existing_AM--C1C2aC3C4C5C6C7C8_Vehicle Travel Time Results.att'
+ExistingAMfi =r'Existing\20834_Existing_AM--C1C2aC3C4C5C6C7C8C9_Vehicle Travel Time Results.att'
 ExistingAMfi = os.path.join(PathToFile,ExistingAMfi)
 
 
 
-NoBuildAMfi = r'No Build\20834_NoBuild_AM--C1C2C3C4C5C6C7C8_Vehicle Travel Time Results.att'
+NoBuildAMfi = r'No Build\20834_NoBuild_AM--C1C2C3C4C5C6C7C8C9_Vehicle Travel Time Results.att'
 NoBuildPMfi = r'No Build\20834_NoBuild_PM---C1C2C3C4C5C6C7C8_Vehicle Travel Time Results.att'
-BuildDCDI_AMfi = r'Build\DCDI\20834_Build1_6LnMod_AM---C1C2C3C4C5C6C7C8C9_Vehicle Travel Time Results.att'
+BuildDCDI_AMfi = r'Build\DCDI\20834_Build1_6LnMod_AM---C1C2C3C4C5C6C7C8C9C10_Vehicle Travel Time Results.att'
 BuildDCDI_PMfi = r'Build\DCDI\20834_Build1_6LnMod_PM---C1C2C3C4C5C6C7C8C9_Vehicle Travel Time Results.att'
 BuildDCMI_AMfi = r'Build\DCMI\20834_DCMI_AM_20180808--C1C2C3C4C5C6C7C8_Vehicle Travel Time Results.att'
 BuildDCMI_PMfi = r'Build\DCMI\20834_DCMI_PM_20180808--C1C2C3C4C5C6C7C8_Vehicle Travel Time Results.att'
@@ -172,7 +172,7 @@ FileAM  = BuildDCDI_AMfi
 FileAM  = BuildDCMI_AMfi
 #File Being Processed
 #*******************************************************************************
-FileAM = BuildDCMI_AMfi
+FileAM = ExistingAMfi
 #*******************************************************************************
 
 def switch_PMFile(argument):
@@ -313,7 +313,7 @@ for t in TimePer:
                 g.set_xticklabels(rotation=30,labels = g.get_xticklabels(),ha='right')
                 g.set_title('{}—{}'.format(t,title_))
                 g.set_xlabel("")
-                g.set_ylabel("15 min Time Interval")
+                g.set_ylabel("Time Interval")
                 fig = g.get_figure()
                 fig.savefig("".join([t,d,PerfMes,'.jpg']),bbox_inches="tight")
 
@@ -350,7 +350,7 @@ for t in TimePer:
 
                     ax1.set_title('{}—{}'.format(t,Tseg), y =1.05)
                     ax1.set_ylabel(ylab)
-                    ax1.set_xlabel("15 min Time Interval")
+                    ax1.set_xlabel("Time Interval")
                     # Must draw the canvas to position the ticks
                     fig.canvas.draw()
                     ax1.set_xticklabels(rotation=30,labels = ax1.get_xticklabels(),ha='right')
