@@ -172,7 +172,7 @@ FileAM  = BuildDCDI_AMfi
 FileAM  = BuildDCMI_AMfi
 #File Being Processed
 #*******************************************************************************
-FileAM = ExistingAMfi
+FileAM = BuildDCMI_AMfi
 #*******************************************************************************
 
 def switch_PMFile(argument):
