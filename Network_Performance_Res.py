@@ -37,6 +37,7 @@ DCDI_PM=glob.glob(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Docu
 DCMI_AM=glob.glob(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files\VISSIM - V2\Build\DCMI\*AM*_Vehicle Network Performance Evaluation Results.att')
 DCMI_PM=glob.glob(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files\VISSIM - V2\Build\DCMI\*PM*_Vehicle Network Performance Evaluation Results.att')
 
+file = ExistAM[0]
 
 def CleanNetPerFun(file):
     '''
@@ -60,13 +61,19 @@ def CleanNetPerFun(file):
                           'DELAYTOT(ALL)': 'Total Delay — All (sec)',
                           'STOPSTOT(ALL)': 'Total Stops — All',
                           'STOPSAVG(ALL)': 'Average Stops — All',
-                          'SPEEDAVG(ALL)': 'Average Stops — All',
+                          'SPEEDAVG(ALL)': 'Average Speed — All',
                           'DELAYLATENT' : 'Latent Delay (sec)',
                           'DEMANDLATENT': 'Latent Demand (veh)'
                           })
     Dat = Dat[['TIMEINT','Average Delay — All (sec)', 
     'Total Delay — All (sec)','Total Stops — All','Average Stops — All',
-    'Average Stops — All','Latent Delay (sec)', 'Latent Demand (veh)']]    
+    'Average Speed — All','Latent Delay (sec)', 'Latent Demand (veh)']]   
+    Dat.dtypes
+    listVar = ['Average Delay — All (sec)', 
+    'Total Delay — All (sec)','Average Stops — All',
+    'Average Speed — All','Latent Delay (sec)', 'Latent Demand (veh)']
+    Dat.loc[:,listVar] = Dat.loc[:,listVar].applymap(lambda x: format(x,',.1f'))
+    Dat.loc[:,'Total Stops — All'] =Dat.loc[:,'Total Stops — All'].apply(lambda x: format(x,','))
     match_AM = re.search('_AM',file)
     if match_AM:
         Dat = TimeKeys_AM.merge(Dat,left_on='TIMEINT',right_on='TIMEINT',how='right').drop(columns='TIMEINT')

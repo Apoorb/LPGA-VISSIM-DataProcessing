@@ -167,6 +167,7 @@ def ReadMergeVissimObs(VissimDATA, File=None, SheetNm = 'ExistingAM',IsFileDCMI=
     ExistPM_Vissim.loc[:,'QLenMax'] = ExistPM_Vissim.loc[:,'QLenMax'].fillna(0)
     ExistPM_Vissim.loc[:,'QLenMax'] = ExistPM_Vissim.QLenMax.round(1)
     ExistPM_Vissim.drop(columns=['veh','DelayIntoVeh'],inplace=True)
+    ExistPM_Vissim.loc[:,['Delay','QLenMax']] =ExistPM_Vissim.loc[:,['Delay','QLenMax']].applymap(lambda x: format(x,',.1f'))
     Temp = ExistPM_Vissim[ExistPM_Vissim.Movement =='OverallIntersection'].copy()
     Temp.loc[:,'Movement'] = 'HSep'
     Temp.loc[:,['Delay','LOS','QLenMax']] = '---'
