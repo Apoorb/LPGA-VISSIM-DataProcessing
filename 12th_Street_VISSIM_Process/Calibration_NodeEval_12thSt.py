@@ -18,8 +18,8 @@ import os
 import pandas as pd
 import numpy as np
 
-#os.chdir(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\12th-Street-TransitWay\Results')
-os.chdir(r'H:\20\20548 - Arlington County Engineering On-Call\009 - 12th Street Transitway Extension\vissim\Results')
+os.chdir(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\12th-Street-TransitWay\Results')
+#os.chdir(r'H:\20\20548 - Arlington County Engineering On-Call\009 - 12th Street Transitway Extension\vissim\Results')
 os.getcwd()
 
 # Read the Mapping Data
@@ -141,12 +141,12 @@ def FinalTable_GEH(AM_Res, PM_Res):
     
 #Read Node EVal
 #*********************************************************************************
-NodeEvalFile_AM = r'./RawVissimOutput/20548_2019_am-existing_Calib_Node Results.att'
+NodeEvalFile_AM = r'./RawVissimOutput/20548_2019_am-existing_V8_Node Results.att'
 file = NodeEvalFile_AM
 
 NodeEvalFile_PM = NodeEvalFile_AM  # Change later
-VissimDat = ProcessVissimVolumes(file, SimRun = 1)
-VissimDat_pm = ProcessVissimVolumes(NodeEvalFile_PM, SimRun = 1)
+VissimDat = ProcessVissimVolumes(file, SimRun = "AVG")
+VissimDat_pm = ProcessVissimVolumes(NodeEvalFile_PM, SimRun = "AVG")
 
 #Read Observed TMC Data 
 #*********************************************************************************

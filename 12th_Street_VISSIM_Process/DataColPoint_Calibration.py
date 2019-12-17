@@ -18,8 +18,8 @@ import os
 import pandas as pd
 
 # Use consistent naming in VISSIM
-#os.chdir(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\12th-Street-TransitWay\Results')
-os.chdir(r'H:\20\20548 - Arlington County Engineering On-Call\009 - 12th Street Transitway Extension\vissim\Results')
+os.chdir(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\12th-Street-TransitWay\Results')
+#os.chdir(r'H:\20\20548 - Arlington County Engineering On-Call\009 - 12th Street Transitway Extension\vissim\Results')
 
 
 x1 = pd.ExcelFile(r'ResultsNameMap.xlsx')
@@ -63,7 +63,7 @@ Field_DatCol.rename(columns = {'AvgSpd':'ObsAvgSpd'},inplace=True)
 #*********************************************************************************
 # Specify Files
 #*********************************************************************************
-DatColFile_AM = r'./RawVissimOutput/20548_2019_am-existing_V6_Data Collection Results.att'
+DatColFile_AM = r'./RawVissimOutput/20548_2019_am-existing_V8_Data Collection Results.att'
 file  = DatColFile_AM
 DatColFile_PM = DatColFile_AM
 DatCol_Existing_AM = PreProcessVissimDataCol(file = DatColFile_PM,DatColMap = DatColMap,Peak= "AM Peak")

@@ -18,8 +18,8 @@ ipython = get_ipython()
 import os
 import pandas as pd
 
-#os.chdir(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\12th-Street-TransitWay\Results')
-os.chdir(r'H:\20\20548 - Arlington County Engineering On-Call\009 - 12th Street Transitway Extension\vissim\Results')
+os.chdir(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\12th-Street-TransitWay\Results')
+#os.chdir(r'H:\20\20548 - Arlington County Engineering On-Call\009 - 12th Street Transitway Extension\vissim\Results')
 
 
 
@@ -27,9 +27,7 @@ x1 = pd.ExcelFile(r'ResultsNameMap.xlsx')
 x1.sheet_names
 TTMap = x1.parse('TTMap')
 
-x1 = pd.ExcelFile('CollectedData/12th Street Travel Times.xlsx')
-x1.sheet_names
-Field_TT = x1.parse('TT_Inputs')
+Field_TT = x1.parse('TTFieldCalibMap')
 
 #******************************************************************************************************************************************************************
 def PreProcessVissimTT(file,TTMap = TTMap,Peak= "AM Peak"):
@@ -62,8 +60,8 @@ def PreProcessVissimTT(file,TTMap = TTMap,Peak= "AM Peak"):
 # Specify Files
 #*********************************************************************************
 
-TTFile_AM = r'./RawVissimOutput/20548_2019_am-existing_V5_Vehicle Travel Time Results.att'
-#file = TTFile
+TTFile_AM = r'./RawVissimOutput/20548_2019_am-existing_V8_Vehicle Travel Time Results.att'
+file = TTFile_AM
 TTFile_PM = TTFile_AM # change later when you get results
 
 
