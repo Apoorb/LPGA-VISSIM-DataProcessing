@@ -17,6 +17,7 @@ ipython = get_ipython()
 import os
 import pandas as pd
 import numpy as np
+import subprocess 
 
 os.chdir(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\12th-Street-TransitWay\Results')
 #os.chdir(r'H:\20\20548 - Arlington County Engineering On-Call\009 - 12th Street Transitway Extension\vissim\Results')
@@ -121,12 +122,12 @@ def MergeVISSIM_ObsTMC(VissimDat, ObsDat):
 # Get Final GEH Values for AM and PM 
 #*********************************************************************************
 def FinalTable_GEH(AM_Res, PM_Res):
-        
     #Get Final Table
+    AM_Res = AM_Res[~pd.isna(AM_Res.GEH)]
     GEHBelow2= sum((AM_Res.loc[:,'GEH']<=2).values.ravel())/AM_Res.shape[0]
     GEHBelow5= sum((AM_Res.loc[:,'GEH']<=5).values.ravel())/AM_Res.shape[0]
     GEHBelow10= sum((AM_Res.loc[:,'GEH']<=10).values.ravel())/AM_Res.shape[0]
-
+    PM_Res = PM_Res[~pd.isna(PM_Res.GEH)]
     GEHBelow2_pm= sum((PM_Res.loc[:,'GEH']<=2).values.ravel())/PM_Res.shape[0]
     GEHBelow5_pm= sum((PM_Res.loc[:,'GEH']<=5).values.ravel())/PM_Res.shape[0]
     GEHBelow10_pm= sum((PM_Res.loc[:,'GEH']<=10).values.ravel())/PM_Res.shape[0]
@@ -141,12 +142,12 @@ def FinalTable_GEH(AM_Res, PM_Res):
     
 #Read Node EVal
 #*********************************************************************************
-NodeEvalFile_AM = r'./RawVissimOutput/20548_2019_am-existing_V8_Node Results.att'
+NodeEvalFile_AM = r'./RawVissimOutput/20548_2019_am-existing_V9_calib---2_Node Results.att'
 file = NodeEvalFile_AM
 
 NodeEvalFile_PM = NodeEvalFile_AM  # Change later
-VissimDat = ProcessVissimVolumes(file, SimRun = "AVG")
-VissimDat_pm = ProcessVissimVolumes(NodeEvalFile_PM, SimRun = "AVG")
+VissimDat = ProcessVissimVolumes(file, SimRun = 1)
+VissimDat_pm = ProcessVissimVolumes(NodeEvalFile_PM, SimRun = 1)
 
 #Read Observed TMC Data 
 #*********************************************************************************
@@ -181,7 +182,8 @@ FinTab.to_excel(writer, 'Report_Table',na_rep='-')
 writer.save() 
 
     
-    
+subprocess.Popen([OutFi],shell=True)  
+
    
 
         
