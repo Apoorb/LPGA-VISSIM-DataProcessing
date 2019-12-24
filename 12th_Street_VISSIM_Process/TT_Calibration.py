@@ -30,7 +30,7 @@ TTMap = x1.parse('TTMap')
 Field_TT = x1.parse('TTFieldCalibMap')
 
 #******************************************************************************************************************************************************************
-def PreProcessVissimTT(file,TTMap = TTMap,Peak= "AM Peak"):
+def PreProcessVissimTT(file,TTMap = TTMap,Peak= "AM Peak", SimRun = "AVG"):
     #Ignore the variable names. Don't actually mean ExistingAMDat
     # Define PM file. Would later use to figure out if a file for PM 
     # This is hard coding. Would break if the name of PM file is changed.
@@ -38,7 +38,7 @@ def PreProcessVissimTT(file,TTMap = TTMap,Peak= "AM Peak"):
     ExistingAMDat=pd.read_csv(file,sep =';',comment = "*",skiprows=1)
     ExistingAMDat.columns
     ExistingAMDat.rename(columns={'TRAVTM(ALL)':'VissimTT','VEHS(ALL)':'Veh'},inplace=True)
-    mask=ExistingAMDat["$VEHICLETRAVELTIMEMEASUREMENTEVALUATION:SIMRUN"]=="AVG"
+    mask=ExistingAMDat["$VEHICLETRAVELTIMEMEASUREMENTEVALUATION:SIMRUN"]==SimRun
     ExistingAMDat = ExistingAMDat[mask]
     ExistingAMDat = ExistingAMDat.merge(TTMap,left_on = 'VEHICLETRAVELTIMEMEASUREMENT', right_on = 'TT_No', how ='left')
     mask1 = ExistingAMDat.TIMEINT.isin(['900-4500']) 
@@ -60,7 +60,7 @@ def PreProcessVissimTT(file,TTMap = TTMap,Peak= "AM Peak"):
 # Specify Files
 #*********************************************************************************
 
-TTFile_AM = r'./RawVissimOutput/20548_2019_am-existing_V8_Vehicle Travel Time Results.att'
+TTFile_AM = r'./RawVissimOutput/20548_2019_am-existing_V9_calib---2_Vehicle Travel Time Results.att'
 file = TTFile_AM
 TTFile_PM = TTFile_AM # change later when you get results
 
@@ -68,8 +68,8 @@ TTFile_PM = TTFile_AM # change later when you get results
 #*********************************************************************************
 # Call Function
 #*********************************************************************************
-TT_Existing_AM = PreProcessVissimTT(file = TTFile_AM,TTMap = TTMap, Peak = "AM Peak")
-TT_Existing_PM = PreProcessVissimTT(file = TTFile_PM,TTMap = TTMap, Peak = "PM Peak")
+TT_Existing_AM = PreProcessVissimTT(file = TTFile_AM,TTMap = TTMap, Peak = "AM Peak" ,SimRun=1)
+TT_Existing_PM = PreProcessVissimTT(file = TTFile_PM,TTMap = TTMap, Peak = "PM Peak", SimRun=1)
 TT_Existing = pd.concat([TT_Existing_AM,TT_Existing_PM])
 merge_on =["TT_No","Peak"]
 Field_TT.rename(columns = {'Vissim_TT_No':'TT_No'}, inplace=True)
