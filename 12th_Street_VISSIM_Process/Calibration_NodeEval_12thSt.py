@@ -142,12 +142,11 @@ def FinalTable_GEH(AM_Res, PM_Res):
     
 #Read Node EVal
 #*********************************************************************************
-NodeEvalFile_AM = r'./RawVissimOutput/20548_2019_am-existing_V9_calib---2_Node Results.att'
+NodeEvalFile_AM = r'./RawVissimOutput/20548_2019_am-existing_V11_OldConnectorConfig_GEHCal_Node Results.att'
 file = NodeEvalFile_AM
-
-NodeEvalFile_PM = NodeEvalFile_AM  # Change later
-VissimDat = ProcessVissimVolumes(file, SimRun = 1)
-VissimDat_pm = ProcessVissimVolumes(NodeEvalFile_PM, SimRun = 1)
+NodeEvalFile_PM = r'./RawVissimOutput/20548_2019_pm-existing_V5_Node Results.att'
+VissimDat = ProcessVissimVolumes(file, SimRun = "AVG")
+VissimDat_pm = ProcessVissimVolumes(NodeEvalFile_PM, SimRun = "AVG")
 
 #Read Observed TMC Data 
 #*********************************************************************************

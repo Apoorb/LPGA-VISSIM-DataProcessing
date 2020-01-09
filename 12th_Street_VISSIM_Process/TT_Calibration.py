@@ -60,16 +60,16 @@ def PreProcessVissimTT(file,TTMap = TTMap,Peak= "AM Peak", SimRun = "AVG"):
 # Specify Files
 #*********************************************************************************
 
-TTFile_AM = r'./RawVissimOutput/20548_2019_am-existing_V9_calib---2_Vehicle Travel Time Results.att'
+TTFile_AM = r'./RawVissimOutput/20548_2019_am-existing_V11_OldConnectorConfig_GEHCal_Vehicle Travel Time Results.att'
 file = TTFile_AM
-TTFile_PM = TTFile_AM # change later when you get results
+TTFile_PM =  r'./RawVissimOutput/20548_2019_pm-existing_V5_Vehicle Travel Time Results.att'
 
 
 #*********************************************************************************
 # Call Function
 #*********************************************************************************
-TT_Existing_AM = PreProcessVissimTT(file = TTFile_AM,TTMap = TTMap, Peak = "AM Peak" ,SimRun=1)
-TT_Existing_PM = PreProcessVissimTT(file = TTFile_PM,TTMap = TTMap, Peak = "PM Peak", SimRun=1)
+TT_Existing_AM = PreProcessVissimTT(file = TTFile_AM,TTMap = TTMap, Peak = "AM Peak" ,SimRun= "AVG")
+TT_Existing_PM = PreProcessVissimTT(file = TTFile_PM,TTMap = TTMap, Peak = "PM Peak", SimRun= "AVG")
 TT_Existing = pd.concat([TT_Existing_AM,TT_Existing_PM])
 merge_on =["TT_No","Peak"]
 Field_TT.rename(columns = {'Vissim_TT_No':'TT_No'}, inplace=True)
@@ -77,6 +77,7 @@ Calibration_Dat = Field_TT.merge(TT_Existing,left_on = merge_on, right_on = merg
 Calibration_Dat.rename(columns = {'WeightedVissimTT':'VissimAvgTT'}, inplace=True)
 Calibration_Dat = Calibration_Dat[['Peak','Direction','SegmentName','ObsAvgTT','VissimAvgTT']]
 Calibration_Dat.loc[:,'TT_Difference'] = Calibration_Dat.ObsAvgTT - Calibration_Dat.VissimAvgTT
+
 Calibration_Dat.set_index(['Peak','Direction','SegmentName'],inplace=True)
 
 OutFi = r'TT_DataCol_Calibration.xlsx'

@@ -16,6 +16,7 @@ ipython = get_ipython()
 
 import os
 import pandas as pd
+import numpy as np
 import subprocess 
 # Use consistent naming in VISSIM
 os.chdir(r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\12th-Street-TransitWay\Results')
@@ -63,11 +64,11 @@ Field_DatCol.rename(columns = {'AvgSpd':'ObsAvgSpd'},inplace=True)
 #*********************************************************************************
 # Specify Files
 #*********************************************************************************
-DatColFile_AM = r'./RawVissimOutput/20548_2019_am-existing_V9_calib---2_Data Collection Results.att'
-file  = DatColFile_AM
-DatColFile_PM = DatColFile_AM
-DatCol_Existing_AM = PreProcessVissimDataCol(file = DatColFile_PM,DatColMap = DatColMap,Peak= "AM Peak",SimRun=1)
-DatCol_Existing_PM = PreProcessVissimDataCol(file = DatColFile_PM,DatColMap = DatColMap,Peak= "PM Peak",SimRun=1)    
+DatColFile_AM = r'./RawVissimOutput/20548_2019_am-existing_V11_OldConnectorConfig_GEHCal_Data Collection Results.att'
+#file  = DatColFile_AM
+DatColFile_PM = r'./RawVissimOutput/20548_2019_pm-existing_V5_Data Collection Results.att'
+DatCol_Existing_AM = PreProcessVissimDataCol(file = DatColFile_PM,DatColMap = DatColMap,Peak= "AM Peak",SimRun="AVG")
+DatCol_Existing_PM = PreProcessVissimDataCol(file = DatColFile_PM,DatColMap = DatColMap,Peak= "PM Peak",SimRun= "AVG")    
 
 #*********************************************************************************
 # Call Function
@@ -77,7 +78,10 @@ merge_on =["DataColNo","Peak"]
 Calibration_Dat = Field_DatCol.merge(DatCol_Existing,left_on = merge_on, right_on = merge_on, how ='left')
 Calibration_Dat = Calibration_Dat[['Peak','Direction',"DatColNm",'DataColNo','ObsAvgSpd','VissimAvgSpd']]
 Calibration_Dat.sort_values(['Peak','DataColNo'],inplace=True)
-Calibration_Dat.loc[:,'Spd_Difference'] = Calibration_Dat.ObsAvgSpd - Calibration_Dat.VissimAvgSpd
+Calibration_Dat.loc[:,'Spd_Difference'] = np.round(Calibration_Dat.ObsAvgSpd - Calibration_Dat.VissimAvgSpd,1)
+Calibration_Dat.loc[:,'Spd_Difference_Per'] = np.round(100*Calibration_Dat.loc[:,'Spd_Difference'] /Calibration_Dat.ObsAvgSpd,1) 
+Calibration_Dat.loc[:,'Spd_Diff_and_Per'] = Calibration_Dat['Spd_Difference'].astype(str)+', ' + Calibration_Dat['Spd_Difference_Per'].astype(str)
+Calibration_Dat = Calibration_Dat[['Peak','Direction',"DatColNm",'DataColNo','ObsAvgSpd','VissimAvgSpd','Spd_Diff_and_Per']]
 Calibration_Dat.set_index(['Peak','Direction','DatColNm'],inplace=True)
 Calibration_Dat = Calibration_Dat.round(1)
 OutFi = r'TT_DataCol_Calibration.xlsx'
