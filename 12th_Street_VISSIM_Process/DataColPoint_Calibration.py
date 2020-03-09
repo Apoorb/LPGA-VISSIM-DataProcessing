@@ -64,9 +64,9 @@ Field_DatCol.rename(columns = {'AvgSpd':'ObsAvgSpd'},inplace=True)
 #*********************************************************************************
 # Specify Files
 #*********************************************************************************
-DatColFile_AM = r'./RawVissimOutput/20548_2019_am-existing_V11_OldConnectorConfig_GEHCal_Data Collection Results.att'
+DatColFile_AM = r'./RawVissimOutput/20548_2019_am-existing_V12_Data Collection Results.att'
 #file  = DatColFile_AM
-DatColFile_PM = r'./RawVissimOutput/20548_2019_pm-existing_V5_Data Collection Results.att'
+DatColFile_PM = r'./RawVissimOutput/20548_2019_pm-existing_V6_Data Collection Results.att'
 DatCol_Existing_AM = PreProcessVissimDataCol(file = DatColFile_PM,DatColMap = DatColMap,Peak= "AM Peak",SimRun="AVG")
 DatCol_Existing_PM = PreProcessVissimDataCol(file = DatColFile_PM,DatColMap = DatColMap,Peak= "PM Peak",SimRun= "AVG")    
 

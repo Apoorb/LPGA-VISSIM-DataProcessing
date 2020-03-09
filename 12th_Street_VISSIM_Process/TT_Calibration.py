@@ -60,9 +60,9 @@ def PreProcessVissimTT(file,TTMap = TTMap,Peak= "AM Peak", SimRun = "AVG"):
 # Specify Files
 #*********************************************************************************
 
-TTFile_AM = r'./RawVissimOutput/20548_2019_am-existing_V11_OldConnectorConfig_GEHCal_Vehicle Travel Time Results.att'
+TTFile_AM = r'./RawVissimOutput/20548_2019_am-existing_V12_Vehicle Travel Time Results.att'
 file = TTFile_AM
-TTFile_PM =  r'./RawVissimOutput/20548_2019_pm-existing_V5_Vehicle Travel Time Results.att'
+TTFile_PM =  r'./RawVissimOutput/20548_2019_pm-existing_V6_Vehicle Travel Time Results.att'
 
 
 #*********************************************************************************
