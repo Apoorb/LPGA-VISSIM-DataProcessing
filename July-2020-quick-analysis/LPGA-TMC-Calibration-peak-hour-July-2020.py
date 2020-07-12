@@ -149,6 +149,8 @@ def ReadMergeVissimObs(VissimDATA = ExPMMvMDat, File = KeyValFi,VolTime='PeakPMV
              left_on =['Intersection','HourInt','Movement'],
              right_on = ['Intersection','HourInt','Movement'],
              how='left')
+    ExistPM_Vissim=\
+        ExistPM_Vissim.query("HourInt.isin(['4500-5400','5400-6300','6300-7200','7200-8100'])")
     Debug = ExistPM_Vissim
     Debug.loc[:,'Num'] = ((ExistPM_Vissim.VissimVol - ExistPM_Vissim.ObsVol)**2)
     Debug.loc[:,'Denom'] = ((ExistPM_Vissim.VissimVol + ExistPM_Vissim.ObsVol)/2)
@@ -165,8 +167,6 @@ ExistPM_Vissim = ReadMergeVissimObs()
 ExistAM_Vissim = ReadMergeVissimObs(VissimDATA = ExAMMvMDat, File = KeyValFi,VolTime='PeakAMVol' ,
                        Peak = (.90 + 1.12 + 1.12 + 0.86), 
                        ConversionFactors = AMConvFactors)
-
-
 ExistAM_Vissim.set_index('Intersection',inplace=True)
 IntersectionKey = {'1':'LPGA/Tomoka Farms',
                     '2':'LPGA/I-95 SB Ramp',
@@ -175,21 +175,50 @@ IntersectionKey = {'1':'LPGA/Tomoka Farms',
                     '5':'LPGA/Williamson',
                     '6':'LPGA/Clyde Morris'}
 ExistAM_Vissim =ExistAM_Vissim.rename(axis = 0, mapper=IntersectionKey).reset_index()
+ExistAM_Vissim = ExistAM_Vissim[['Intersection','Movement','HourInt','ObsVol','VissimVol','GEH']]
+ExistPM_Vissim = ExistPM_Vissim[['Intersection','Movement','HourInt','ObsVol','VissimVol','GEH']]
+
+##########################
+##########################
+# HACK
+#########################
+path_to_i95_tmc_dir = r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\July-6-2020\Models---July-2020\VISSIM'
+file_nm  = "i-95-processed-vissim-observed-volumes.xlsx"
+path_to_i95_tmc_file = os.path.join(path_to_i95_tmc_dir,file_nm)
+x1 = pd.ExcelFile(path_to_i95_tmc_file)
+x1.sheet_names
+ExistAM_Vissim_i95 = x1.parse('am_i95_volume',index_col=0)
+ExistPM_Vissim_i95 = x1.parse('pm_i95_volume',index_col=0)
+
+ExistAM_Vissim = pd.concat([ExistAM_Vissim,ExistAM_Vissim_i95])
+ExistPM_Vissim = pd.concat([ExistPM_Vissim,ExistPM_Vissim_i95])
+##########################
+# HACK END
+#########################
 ExistAM_Vissim.Intersection = pd.Categorical(ExistAM_Vissim.Intersection,[
-                    'LPGA/Tomoka Farms',
-                    'LPGA/I-95 SB Ramp',
-                    'LPGA/I-95 NB Ramp',
-                    'LPGA/Technology',
-                    'LPGA/Williamson',
-                    'LPGA/Clyde Morris'])
+    'LPGA/Tomoka Farms',
+    'LPGA/I-95 SB Ramp',
+    'LPGA/I-95 NB Ramp',
+    'LPGA/Technology',
+    'LPGA/Williamson',
+    'LPGA/Clyde Morris',
+    'SB I-95 (SR40 to SB OffRamp)',
+    'SB I-95 (SB OffRamp to SB LoopRamp)',
+    'SB I-95 (SB LoopRamp to SB On-Ramp)',
+    'SB I-95 (SB On-Ramp to US92)',
+    'NB I-95 (US92 to NB OffRamp)',
+    'NB I-95 (NB OffRamp to NB LoopRamp)',
+    'NB I-95 ( NB LoopRamp to NB On-Ramp)',
+    'NB I-95 (NB On-Ramp to SR40)'
+])
+
+
 ExistAM_Vissim = ExistAM_Vissim.set_index(['Intersection','Movement','HourInt']).unstack()
 ExistAM_Vissim.loc[:,:'ObsVol'] = ExistAM_Vissim.loc[:,:'ObsVol'].round()
 ExistAM_Vissim.loc[:,:'VissimVol'] = ExistAM_Vissim.loc[:,:'VissimVol'].round()
 ExistAM_Vissim.loc[:,:'GEH'] = ExistAM_Vissim.loc[:,:'GEH'].round(2)
 ExistAM_Vissim.columns = ExistAM_Vissim.columns.swaplevel(0, 1)
-mux = pd.MultiIndex.from_product([['900-1800','1800-2700','2700-3600','3600-4500',
-                                        '4500-5400','5400-6300','6300-7200','7200-8100',
-                                        '8100-9000','9000-9900','9900-10800','10800-11700'],
+mux = pd.MultiIndex.from_product([['4500-5400','5400-6300','6300-7200','7200-8100'],
                                   [u'ObsVol',u'VissimVol',u'GEH']], names=ExistAM_Vissim.index.names)
 ExistAM_Vissim = ExistAM_Vissim.reindex(mux,axis=1)
 
@@ -197,19 +226,30 @@ ExistAM_Vissim = ExistAM_Vissim.reindex(mux,axis=1)
 ExistPM_Vissim.set_index('Intersection',inplace=True)
 ExistPM_Vissim =ExistPM_Vissim.rename(axis = 0, mapper=IntersectionKey).reset_index()
 ExistPM_Vissim.Intersection = pd.Categorical(ExistPM_Vissim.Intersection,[
-                    'LPGA/Tomoka Farms',
-                    'LPGA/I-95 SB Ramp',
-                    'LPGA/I-95 NB Ramp',
-                    'LPGA/Technology',
-                    'LPGA/Williamson',
-                    'LPGA/Clyde Morris'])
+    'LPGA/Tomoka Farms',
+    'LPGA/I-95 SB Ramp',
+    'LPGA/I-95 NB Ramp',
+    'LPGA/Technology',
+    'LPGA/Williamson',
+    'LPGA/Clyde Morris',
+    'SB I-95 (SR40 to SB OffRamp)',
+    'SB I-95 (SB OffRamp to SB LoopRamp)',
+    'SB I-95 (SB LoopRamp to SB On-Ramp)',
+    'SB I-95 (SB On-Ramp to US92)',
+    'NB I-95 (US92 to NB OffRamp)',
+    'NB I-95 (NB OffRamp to NB LoopRamp)',
+    'NB I-95 ( NB LoopRamp to NB On-Ramp)',
+    'NB I-95 (NB On-Ramp to SR40)'
+])
+
 ExistPM_Vissim = ExistPM_Vissim.set_index(['Intersection','Movement','HourInt']).unstack()
 ExistPM_Vissim.loc[:,:'ObsVol'] = ExistPM_Vissim.loc[:,:'ObsVol'].round()
 ExistPM_Vissim.loc[:,:'VissimVol'] = ExistPM_Vissim.loc[:,:'VissimVol'].round()
 ExistPM_Vissim.loc[:,:'GEH'] = ExistPM_Vissim.loc[:,:'GEH'].round(2)
 ExistPM_Vissim.columns = ExistPM_Vissim.columns.swaplevel(0, 1)
 ExistPM_Vissim = ExistPM_Vissim.reindex(mux,axis=1)
-
+ExistAM_Vissim = ExistAM_Vissim.dropna(axis=0)
+ExistPM_Vissim = ExistPM_Vissim.dropna(axis=0)
 
 #Get Final Table
 idx = pd.IndexSlice
@@ -231,7 +271,7 @@ FinTab = {'Time' : ['AM Peak Hour','AM Peak Hour','AM Peak Hour','PM Peak Hour',
 FinDat = pd.DataFrame(FinTab)
 FinDat['Modeled Result'] = (FinDat[ 'Modeled Result']*100).apply(lambda x: str(round(x))+'%')
 
-PathToKeyVal = r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files'
+PathToKeyVal = r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\July-6-2020\Models---July-2020\VISSIM'
 OutFi = "Report-TT-GEH-Results.xlsx"
 OutFi = os.path.join(PathToKeyVal,OutFi)
 writer=pd.ExcelWriter(OutFi,mode ='a')
