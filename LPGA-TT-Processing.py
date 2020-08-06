@@ -43,23 +43,23 @@ def TTSegName(x):
             20:'NB I-95 (NB OffRamp to NB LoopRamp)',
             21:'NB I-95 ( NB LoopRamp to NB On-Ramp)',
             22:'NB I-95 (NB On-Ramp to SR40)'}
-    Nm = TTSeg[x]
+    if(x<23):
+        Nm = TTSeg[x]
+    else: Nm = None
     return Nm
 
 # VISSIM File
 #*********************************************************************************
-PathToExist = r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files\VISSIM - V2\Existing'
-ExistingPMfi = '20834_Existing_PM--C1C2C3C4C5C6C7_Vehicle Travel Time Results.att'
+PathToExist = r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\July-6-2020\Models---July-2020\VISSIM\Existing'
+ExistingPMfi = '20834_Existing_PM_Vehicle Travel Time Results.att'
 ExistingPMfi = os.path.join(PathToExist,ExistingPMfi)
-ExistingAMfi ='20834_Existing_AM--C1C2aC3C4C5C6C7C8_Vehicle Travel Time Results.att'
+ExistingAMfi ='20834_Existing_AM_Vehicle Travel Time Results.att'
 ExistingAMfi = os.path.join(PathToExist,ExistingAMfi)
 
 def PreProcessVissimTT(file = ExistingAMfi):
     # Define PM file. Would later use to figure out if a file for PM 
     # This is hard coding. Would break if the name of PM file is changed.
-    PathToExist = r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files\VISSIM - V2\Existing'
-    RefFile = '20834_Existing_PM--C1C2C3C4C5C6C7_Vehicle Travel Time Results.att'
-    RefFile = os.path.join(PathToExist,RefFile)
+    RefFile = ExistingPMfi
     # Read VISSIM results
     ExistingAMDat=pd.read_csv(file,sep =';',skiprows=17)
     ExistingAMDat.columns
@@ -101,12 +101,11 @@ def ProcessObsData(TimePeriod,VissimDat):
     Dat = x1.parse(TimePeriod, index_col=0,nrows= 5,usecols=['ClosestInt', 'DistFromSpd', 'DistBtwPnt', 'TimeDiff', 'SMS_mph',
        'SegName'])
     #Merge with ViSSIM TT data
-    Dat = pd.merge(Dat,VissimDat,left_on=['ClosestInt'],right_on=['VEHICLETRAVELTIMEMEASUREMENT'], how ='left')
+    Dat = pd.merge(Dat,VissimDat,left_on=['ClosestInt'],right_on=['VEHICLETRAVELTIMEMEASUREMENT'], how ='outer')
     Dat.loc[:,'DiffInTravelTime'] = Dat.TimeDiff- Dat.WeightedVissimTT
     Dat.rename(columns={'TimeDiff':'ObsTravelTime'},inplace=True)
     Dat = Dat[['TTSegNm','ObsTravelTime','WeightedVissimTT','DiffInTravelTime']] 
     Dat = Dat.round(1)
-
     return(Dat)
 
 FinTTDat = {}
@@ -120,7 +119,7 @@ FinTTDat['ExistingPM_WB_TT'] = ProcessObsData('PM_WB',ExistingPMDat).sort_index(
 # Write to excel
 #*********************************************************************************
 
-PathToKeyVal = r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\VISSIM-Files'
+PathToKeyVal = r'C:\Users\abibeka\OneDrive - Kittelson & Associates, Inc\Documents\LPGA\July-6-2020\Models---July-2020\VISSIM'
 OutFi = "Report-TT-GEH-Results.xlsx"
 OutFi = os.path.join(PathToKeyVal,OutFi)
 
